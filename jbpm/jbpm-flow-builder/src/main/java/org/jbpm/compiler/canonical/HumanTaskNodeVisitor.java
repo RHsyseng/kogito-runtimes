@@ -16,9 +16,13 @@
 
 package org.jbpm.compiler.canonical;
 
+import com.github.javaparser.utils.StringEscapeUtils;
 import org.jbpm.process.core.Work;
 import org.jbpm.process.core.context.variable.VariableScope;
 import org.jbpm.ruleflow.core.factory.HumanTaskNodeFactory;
+import org.jbpm.workflow.core.DroolsAction;
+import org.jbpm.workflow.core.impl.DroolsConsequenceAction;
+import org.jbpm.workflow.core.impl.ExtendedNodeImpl;
 import org.kie.api.definition.process.Node;
 import org.jbpm.workflow.core.node.HumanTaskNode;
 
@@ -26,23 +30,43 @@ import com.github.javaparser.ast.expr.LongLiteralExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 
-public class HumanTaskNodeVisitor extends AbstractVisitor {
+public class HumanTaskNodeVisitor extends AbstractExtendedNodeVisitor {
+
+    private static final String NODE_NAME = "humanTaskNode";
+
+    @Override
+    protected String getNodeKey() {
+        return NODE_NAME;
+    }
 
     @Override
     public void visitNode(String factoryField, Node node, BlockStmt body, VariableScope variableScope, ProcessMetaData metadata) {
         HumanTaskNode humanTaskNode = (HumanTaskNode) node;
         Work work = humanTaskNode.getWork();
         
-        addFactoryMethodWithArgsWithAssignment(factoryField, body, HumanTaskNodeFactory.class, "humanTaskNode" + node.getId(), "humanTaskNode", new LongLiteralExpr(humanTaskNode.getId()));
-        addFactoryMethodWithArgs(body, "humanTaskNode" + node.getId(), "name", new StringLiteralExpr(getOrDefault(humanTaskNode.getName(), "Task")));            
+        addFactoryMethodWithArgsWithAssignment(factoryField, body, HumanTaskNodeFactory.class, getNodeId(node), NODE_NAME, new LongLiteralExpr(humanTaskNode.getId()));
+        addFactoryMethodWithArgs(body, getNodeId(node), "name", new StringLiteralExpr(getOrDefault(humanTaskNode.getName(), "Task")));
         
-        addWorkItemParameters(work, body, "humanTaskNode" + node.getId());
-        addNodeMappings(humanTaskNode, body, "humanTaskNode" + node.getId());
-        
-        addFactoryMethodWithArgs(body, "humanTaskNode" + node.getId(), "done");
-        
-        visitMetaData(humanTaskNode.getMetaData(), body, "humanTaskNode" + node.getId());    
+        addWorkItemParameters(work, body, getNodeId(node));
+        addNodeMappings(humanTaskNode, body, getNodeId(node));
+
+        addFactoryDoneMethod(body, getNodeId(node));
+
+        addActions(body, humanTaskNode);
+
+        visitMetaData(humanTaskNode.getMetaData(), body, getNodeId(node));
         
         metadata.getWorkItems().add(work.getName());
+    }
+
+    private void addActions(BlockStmt body, ExtendedNodeImpl node) {
+        for (String actionType : node.getActionTypes()) {
+            for (DroolsAction a : node.getActions(actionType)) {
+                if (a instanceof DroolsConsequenceAction) {
+                    DroolsConsequenceAction action = (DroolsConsequenceAction) a;
+                    addFactoryMethodWithArgs(body, getNodeId(node), actionType + "Action", new StringLiteralExpr(action.getDialect()), new StringLiteralExpr(StringEscapeUtils.escapeJava(action.getConsequence())));
+                }
+            }
+        }
     }
 }

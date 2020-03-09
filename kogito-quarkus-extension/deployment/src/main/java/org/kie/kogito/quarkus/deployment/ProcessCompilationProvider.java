@@ -16,7 +16,7 @@ public class ProcessCompilationProvider extends KogitoCompilationProvider {
 
     @Override
     public Set<String> handledExtensions() {
-        return new HashSet<>(asList(".bpmn", ".bpmn2"));
+        return new HashSet<>(asList(".bpmn", ".bpmn2", ".bpmn-cm"));
     }
 
     @Override

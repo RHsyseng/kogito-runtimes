@@ -30,25 +30,32 @@ import com.github.javaparser.ast.expr.LongLiteralExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 
-public class StartNodeVisitor extends AbstractVisitor {
-    
+public class StartNodeVisitor extends AbstractNodeVisitor {
+
+    private static final String NODE_KEY = "startNode";
+
     private static final String TRIGGER_REF = "TriggerRef";
     private static final String MESSAGE_TYPE = "MessageType";
     private static final String TRIGGER_TYPE = "TriggerType";
     private static final String TRIGGER_MAPPING = "TriggerMapping";
 
     @Override
+    public String getNodeKey() {
+        return NODE_KEY;
+    }
+
+    @Override
     public void visitNode(String factoryField, Node node, BlockStmt body, VariableScope variableScope, ProcessMetaData metadata) {
         StartNode startNode = (StartNode) node;
         
-        addFactoryMethodWithArgsWithAssignment(factoryField, body, StartNodeFactory.class, "startNode" + node.getId(), "startNode", new LongLiteralExpr(startNode.getId()));
-        addFactoryMethodWithArgs(body, "startNode" + node.getId(), "name", new StringLiteralExpr(getOrDefault(startNode.getName(), "Start")));
+        addFactoryMethodWithArgsWithAssignment(factoryField, body, StartNodeFactory.class, getNodeId(node), "startNode", new LongLiteralExpr(startNode.getId()));
+        addFactoryMethodWithArgs(body, getNodeId(node), "name", new StringLiteralExpr(getOrDefault(startNode.getName(), "Start")));
         
-        addFactoryMethodWithArgs(body, "startNode" + node.getId(), "interrupting", new BooleanLiteralExpr(startNode.isInterrupting()));
+        addFactoryMethodWithArgs(body, getNodeId(node), "interrupting", new BooleanLiteralExpr(startNode.isInterrupting()));
         
-        visitMetaData(startNode.getMetaData(), body, "startNode" + node.getId());
-        
-        addFactoryMethodWithArgs(body, "startNode" + node.getId(), "done");
+        visitMetaData(startNode.getMetaData(), body, getNodeId(node));
+
+        addFactoryDoneMethod(body, getNodeId(node));
         
         if (startNode.getTriggers() != null && !startNode.getTriggers().isEmpty()) {
             Map<String, Object> nodeMetaData = startNode.getMetaData();
@@ -60,7 +67,7 @@ public class StartNodeVisitor extends AbstractVisitor {
             
             handleSignal(startNode, nodeMetaData, body, variableScope, metadata);
             
-            addFactoryMethodWithArgs(body, "startNode" + node.getId(), "trigger", new StringLiteralExpr((String)nodeMetaData.get(TRIGGER_REF)),
+            addFactoryMethodWithArgs(body, getNodeId(node), "trigger", new StringLiteralExpr((String)nodeMetaData.get(TRIGGER_REF)),
                                                                                   new StringLiteralExpr(getOrDefault((String)nodeMetaData.get(TRIGGER_MAPPING), "")));
         } else {
             // since there is start node without trigger then make sure it is startable
@@ -76,7 +83,7 @@ public class StartNodeVisitor extends AbstractVisitor {
             if (variableMapping != null && !variableMapping.isEmpty()) {
                 Entry<String, String> varInfo = variableMapping.entrySet().iterator().next();
                 
-                addFactoryMethodWithArgs(body, "startNode" + startNode.getId(), "trigger", new StringLiteralExpr((String)nodeMetaData.get(MESSAGE_TYPE)), new StringLiteralExpr(varInfo.getKey()));                    
+                addFactoryMethodWithArgs(body, getNodeId(startNode), "trigger", new StringLiteralExpr((String)nodeMetaData.get(MESSAGE_TYPE)), new StringLiteralExpr(varInfo.getKey()));
                 variable = variableScope.findVariable(varInfo.getKey());
                 
                 if (variable == null) {
