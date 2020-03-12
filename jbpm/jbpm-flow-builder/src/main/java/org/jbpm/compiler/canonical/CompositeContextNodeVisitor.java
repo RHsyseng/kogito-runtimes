@@ -78,17 +78,6 @@ public class CompositeContextNodeVisitor extends AbstractCompositeNodeVisitor {
 
     protected void visitExtendedFields(BlockStmt body, CompositeContextNode node) {}
 
-    private void addActions(BlockStmt body, CompositeContextNode node) {
-        for (String actionType : node.getActionTypes()) {
-            for (DroolsAction a : node.getActions(actionType)) {
-                if (a instanceof DroolsConsequenceAction) {
-                    DroolsConsequenceAction action = (DroolsConsequenceAction) a;
-                    addFactoryMethodWithArgs(body, getNodeId(node), actionType + "Action", new StringLiteralExpr(action.getDialect()), new StringLiteralExpr(StringEscapeUtils.escapeJava(action.getConsequence())));
-                }
-            }
-        }
-    }
-
     protected void visitConnections(String factoryField, Node[] nodes, BlockStmt body) {
         List<Connection> connections = new ArrayList<>();
         for (Node node : nodes) {

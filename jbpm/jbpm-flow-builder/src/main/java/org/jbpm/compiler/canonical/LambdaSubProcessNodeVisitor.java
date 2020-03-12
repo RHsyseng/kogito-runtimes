@@ -24,15 +24,12 @@ import java.util.regex.Matcher;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
-import com.github.javaparser.ast.expr.CastExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.LongLiteralExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 
@@ -48,7 +45,8 @@ import org.kie.api.definition.process.WorkflowProcess;
 
 import static com.github.javaparser.StaticJavaParser.parse;
 
-public class LambdaSubProcessNodeVisitor extends AbstractNodeVisitor {
+public class LambdaSubProcessNodeVisitor extends
+                                         AbstractNodeVisitor {
 
     private static final String NODE_NAME = "subProcessNode";
 
@@ -110,9 +108,10 @@ public class LambdaSubProcessNodeVisitor extends AbstractNodeVisitor {
             addFactoryMethodWithArgs(body, getNodeId(node), "subProcessFactory");
         }
         
-        visitMetaData(subProcessNode.getMetaData(), body, "subProcessNode" + node.getId());
+        visitMetaData(subProcessNode.getMetaData(), body, getNodeId(node));
         
         addFactoryDoneMethod(body, getNodeId(node));
+        addActions(body, subProcessNode);
     }
 
     private BlockStmt bind(VariableScope variableScope, SubProcessNode subProcessNode, ModelMetaData subProcessModel) {

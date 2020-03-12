@@ -16,13 +16,9 @@
 
 package org.jbpm.compiler.canonical;
 
-import com.github.javaparser.utils.StringEscapeUtils;
 import org.jbpm.process.core.Work;
 import org.jbpm.process.core.context.variable.VariableScope;
 import org.jbpm.ruleflow.core.factory.HumanTaskNodeFactory;
-import org.jbpm.workflow.core.DroolsAction;
-import org.jbpm.workflow.core.impl.DroolsConsequenceAction;
-import org.jbpm.workflow.core.impl.ExtendedNodeImpl;
 import org.kie.api.definition.process.Node;
 import org.jbpm.workflow.core.node.HumanTaskNode;
 
@@ -30,7 +26,8 @@ import com.github.javaparser.ast.expr.LongLiteralExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 
-public class HumanTaskNodeVisitor extends AbstractExtendedNodeVisitor {
+public class HumanTaskNodeVisitor extends
+                                  AbstractNodeVisitor {
 
     private static final String NODE_NAME = "humanTaskNode";
 
@@ -57,16 +54,5 @@ public class HumanTaskNodeVisitor extends AbstractExtendedNodeVisitor {
         visitMetaData(humanTaskNode.getMetaData(), body, getNodeId(node));
         
         metadata.getWorkItems().add(work.getName());
-    }
-
-    private void addActions(BlockStmt body, ExtendedNodeImpl node) {
-        for (String actionType : node.getActionTypes()) {
-            for (DroolsAction a : node.getActions(actionType)) {
-                if (a instanceof DroolsConsequenceAction) {
-                    DroolsConsequenceAction action = (DroolsConsequenceAction) a;
-                    addFactoryMethodWithArgs(body, getNodeId(node), actionType + "Action", new StringLiteralExpr(action.getDialect()), new StringLiteralExpr(StringEscapeUtils.escapeJava(action.getConsequence())));
-                }
-            }
-        }
     }
 }

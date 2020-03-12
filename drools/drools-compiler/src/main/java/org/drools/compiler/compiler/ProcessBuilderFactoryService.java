@@ -24,6 +24,6 @@ import org.kie.internal.builder.KnowledgeBuilder;
  */
 public interface ProcessBuilderFactoryService extends Service {
 
-    public ProcessBuilder newProcessBuilder(KnowledgeBuilder kBuilder);
+    ProcessBuilder newProcessBuilder(KnowledgeBuilder kBuilder);
 
 }

@@ -51,6 +51,13 @@ import org.kie.api.definition.process.WorkflowProcess;
 
 public class ProcessVisitor extends AbstractVisitor {
 
+    public static final String DEFAULT_VERSION = "1.0";
+    public static final String METHOD_NAME = "name";
+    public static final String METHOD_PACKAGE_NAME = "packageName";
+    public static final String METHOD_DYNAMIC = "dynamic";
+    public static final String METHOD_VERSION = "version";
+    public static final String METHOD_VISIBILITY = "visibility";
+    public static final String METHOD_VALIDATE = "validate";
     private Map<Class<?>, AbstractNodeVisitor> nodesVisitors = new HashMap<>();
 
     public ProcessVisitor(ClassLoader contextClassLoader) {
@@ -70,7 +77,6 @@ public class ProcessVisitor extends AbstractVisitor {
         this.nodesVisitors.put(CompositeContextNode.class, new CompositeContextNodeVisitor(nodesVisitors));
         this.nodesVisitors.put(EventSubProcessNode.class, new EventSubprocessNodeVisitor(nodesVisitors));
         this.nodesVisitors.put(TimerNode.class, new TimerNodeVisitor());
-
 //        this.nodesVisitors.put(DynamicNode.class, new DynamicNodeVisitor(nodesVisitors));
 //        this.nodesVisitors.put(MilestoneNode.class, new MilestoneNodeVisitor());
     }
@@ -95,11 +101,11 @@ public class ProcessVisitor extends AbstractVisitor {
         visitInterfaces(process.getNodes(), body);
 
         // the process itself
-        addFactoryMethodWithArgs(FACTORY_FIELD_NAME, body, "name", new StringLiteralExpr(process.getName()));
-        addFactoryMethodWithArgs(FACTORY_FIELD_NAME, body, "packageName", new StringLiteralExpr(process.getPackageName()));
-        addFactoryMethodWithArgs(FACTORY_FIELD_NAME, body, "dynamic", new BooleanLiteralExpr(((org.jbpm.workflow.core.WorkflowProcess) process).isDynamic()));
-        addFactoryMethodWithArgs(FACTORY_FIELD_NAME, body, "version", new StringLiteralExpr(getOrDefault(process.getVersion(), "1.0")));
-        addFactoryMethodWithArgs(FACTORY_FIELD_NAME, body, "visibility", new StringLiteralExpr(getOrDefault(process.getVisibility(), WorkflowProcess.PUBLIC_VISIBILITY)));
+        addFactoryMethodWithArgs(FACTORY_FIELD_NAME, body, METHOD_NAME, new StringLiteralExpr(process.getName()));
+        addFactoryMethodWithArgs(FACTORY_FIELD_NAME, body, METHOD_PACKAGE_NAME, new StringLiteralExpr(process.getPackageName()));
+        addFactoryMethodWithArgs(FACTORY_FIELD_NAME, body, METHOD_DYNAMIC, new BooleanLiteralExpr(((org.jbpm.workflow.core.WorkflowProcess) process).isDynamic()));
+        addFactoryMethodWithArgs(FACTORY_FIELD_NAME, body, METHOD_VERSION, new StringLiteralExpr(getOrDefault(process.getVersion(), DEFAULT_VERSION)));
+        addFactoryMethodWithArgs(FACTORY_FIELD_NAME, body, METHOD_VISIBILITY, new StringLiteralExpr(getOrDefault(process.getVisibility(), WorkflowProcess.PUBLIC_VISIBILITY)));
 
         visitMetaData(process.getMetaData(), body, FACTORY_FIELD_NAME);
 
@@ -112,7 +118,7 @@ public class ProcessVisitor extends AbstractVisitor {
         visitNodes(processNodes, body, variableScope, metadata);
         visitConnections(process.getNodes(), body);
 
-        addFactoryMethodWithArgs(FACTORY_FIELD_NAME, body, "validate");
+        addFactoryMethodWithArgs(FACTORY_FIELD_NAME, body, METHOD_VALIDATE);
 
         MethodCallExpr getProcessMethod = new MethodCallExpr(new NameExpr(FACTORY_FIELD_NAME), "getProcess");
         body.addStatement(new ReturnStmt(getProcessMethod));

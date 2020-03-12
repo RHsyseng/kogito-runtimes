@@ -16,34 +16,17 @@
 
 package org.jbpm.compiler.canonical;
 
-import static com.github.javaparser.StaticJavaParser.parseClassOrInterfaceType;
-
-import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.drools.core.util.StringUtils;
-import org.jbpm.process.core.Work;
-import org.jbpm.process.core.context.variable.Mappable;
-import org.jbpm.process.core.context.variable.Variable;
-import org.jbpm.process.core.context.variable.VariableScope;
-import org.jbpm.workflow.core.node.WorkItemNode;
-import org.kie.api.definition.process.Node;
-
-import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
-import com.github.javaparser.ast.expr.CastExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.IntegerLiteralExpr;
 import com.github.javaparser.ast.expr.LongLiteralExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.ExpressionStmt;
-import com.github.javaparser.ast.stmt.Statement;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
 
 public abstract class AbstractVisitor {
 
@@ -91,5 +74,4 @@ public abstract class AbstractVisitor {
             }
         }
     }
-
 }

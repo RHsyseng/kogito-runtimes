@@ -39,6 +39,7 @@ public class ProcessToExecModelGenerator {
 
     public static final ProcessToExecModelGenerator INSTANCE = new ProcessToExecModelGenerator(ProcessToExecModelGenerator.class.getClassLoader());
 
+    private static final String PROCESS_TEMPLATE_FILE = "/class-templates/ProcessTemplate.java";
     private static final String PROCESS_CLASS_SUFFIX = "Process";
     private static final String MODEL_CLASS_SUFFIX = "Model";
     private final ProcessVisitor processVisitor;
@@ -49,7 +50,7 @@ public class ProcessToExecModelGenerator {
 
     public ProcessMetaData generate(WorkflowProcess process) {
 
-        CompilationUnit parsedClazzFile = parse(this.getClass().getResourceAsStream("/class-templates/ProcessTemplate.java"));
+        CompilationUnit parsedClazzFile = parse(this.getClass().getResourceAsStream(PROCESS_TEMPLATE_FILE));
         parsedClazzFile.setPackageDeclaration(process.getPackageName());
         Optional<ClassOrInterfaceDeclaration> processClazzOptional = parsedClazzFile.findFirst(ClassOrInterfaceDeclaration.class, sl -> true);
 
@@ -78,7 +79,7 @@ public class ProcessToExecModelGenerator {
 
     public MethodDeclaration generateMethod(WorkflowProcess process) {
 
-        CompilationUnit clazz = parse(this.getClass().getResourceAsStream("/class-templates/ProcessTemplate.java"));
+        CompilationUnit clazz = parse(this.getClass().getResourceAsStream(PROCESS_TEMPLATE_FILE));
         clazz.setPackageDeclaration(process.getPackageName());
 
         String extractedProcessId = extractProcessId(process.getId());
@@ -152,7 +153,6 @@ public class ProcessToExecModelGenerator {
         if (processId.contains(".")) {
             return processId.substring(processId.lastIndexOf('.') + 1);
         }
-
         return processId;
     }
 }

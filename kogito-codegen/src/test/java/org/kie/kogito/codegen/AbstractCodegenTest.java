@@ -36,7 +36,6 @@ import org.drools.compiler.commons.jci.compilers.JavaCompilerFactory;
 import org.drools.compiler.compiler.io.memory.MemoryFileSystem;
 import org.drools.compiler.rule.builder.dialect.java.JavaDialectConfiguration;
 import org.kie.kogito.Application;
-import org.kie.kogito.codegen.context.KogitoBuildContext;
 import org.kie.kogito.codegen.decision.DecisionCodegen;
 import org.kie.kogito.codegen.process.ProcessCodegen;
 import org.kie.kogito.codegen.rules.IncrementalRuleCodegen;
@@ -46,9 +45,9 @@ import org.slf4j.LoggerFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class AbstractCodegenTest {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(AbstractCodegenTest.class);
-    
+
     private TestClassLoader classloader;
 
     private static final JavaCompiler JAVA_COMPILER = JavaCompilerFactory.INSTANCE.loadCompiler(JavaDialectConfiguration.CompilerType.NATIVE, "1.8");
@@ -58,64 +57,57 @@ public class AbstractCodegenTest {
     }
 
     protected Application generateCodeRulesOnly(String... rules) throws Exception {
-        return generateCode( Collections.emptyList(), Arrays.asList(rules), Collections.emptyList(), Collections.emptyList(), true );
+        return generateCode(Collections.emptyList(), Arrays.asList(rules), Collections.emptyList(), Collections.emptyList(), true);
     }
 
     protected Application generateRulesFromJava(String... javaSourceCode) throws Exception {
         return generateCode(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Arrays.asList(javaSourceCode), true);
     }
 
-    protected Application generateCode(List<String> processResources, List<String> rulesResources ) throws Exception {
-        return generateCode( processResources, rulesResources, Collections.emptyList(), Collections.emptyList(), false );
+    protected Application generateCode(List<String> processResources, List<String> rulesResources) throws Exception {
+        return generateCode(processResources, rulesResources, Collections.emptyList(), Collections.emptyList(), false);
     }
 
     protected Application generateCode(
-            List<String> processResources,
-            List<String> rulesResources,
-            List<String> decisionResources,
-            List<String> javaRulesResources,
-            boolean hasRuleUnit) throws Exception {
+        List<String> processResources,
+        List<String> rulesResources,
+        List<String> decisionResources,
+        List<String> javaRulesResources,
+        boolean hasRuleUnit) throws Exception {
         GeneratorContext context = GeneratorContext.ofResourcePath(new File("src/test/resources"));
-        context.withBuildContext(new KogitoBuildContext() {
-            
-            @Override
-            public boolean hasClassAvailable(String fqcn) {
-                return false;
-            }
-        });
+        context.withBuildContext(fqcn -> false);
         ApplicationGenerator appGen =
-                new ApplicationGenerator(this.getClass().getPackage().getName(), new File("target/codegen-tests"))
-                        .withGeneratorContext(context)
-                        .withRuleUnits(hasRuleUnit)
-                        .withDependencyInjection(null);
+            new ApplicationGenerator(this.getClass().getPackage().getName(), new File("target/codegen-tests"))
+                .withGeneratorContext(context)
+                .withRuleUnits(hasRuleUnit)
+                .withDependencyInjection(null);
 
         if (!processResources.isEmpty()) {
             appGen.withGenerator(ProcessCodegen.ofFiles(processResources
-                                                                .stream()
-                                                                .map(resource -> new File("src/test/resources", resource))
-                                                                .collect(Collectors.toList())));
+                                                            .stream()
+                                                            .map(resource -> new File("src/test/resources", resource))
+                                                            .collect(Collectors.toList())));
         }
 
         if (!rulesResources.isEmpty()) {
             appGen.withGenerator(IncrementalRuleCodegen.ofFiles(rulesResources
-                                                                   .stream()
-                                                                   .map(resource -> new File("src/test/resources", resource))
-                                                                   .collect(Collectors.toList())));
-        }
-
-
-        if (!decisionResources.isEmpty()) {
-            appGen.withGenerator(DecisionCodegen.ofFiles(Paths.get("src/test/resources").toAbsolutePath(), decisionResources
                                                                     .stream()
                                                                     .map(resource -> new File("src/test/resources", resource))
                                                                     .collect(Collectors.toList())));
         }
 
+        if (!decisionResources.isEmpty()) {
+            appGen.withGenerator(DecisionCodegen.ofFiles(Paths.get("src/test/resources").toAbsolutePath(), decisionResources
+                .stream()
+                .map(resource -> new File("src/test/resources", resource))
+                .collect(Collectors.toList())));
+        }
+
         if (!javaRulesResources.isEmpty()) {
             appGen.withGenerator(IncrementalRuleCodegen.ofJavaFiles(javaRulesResources
-                                                                            .stream()
-                                                                            .map(resource -> new File("src/test/java/", resource))
-                                                                            .collect(Collectors.toList())));
+                                                                        .stream()
+                                                                        .map(resource -> new File("src/test/java/", resource))
+                                                                        .collect(Collectors.toList())));
         }
 
         Collection<GeneratedFile> generatedFiles = appGen.generate();
@@ -151,15 +143,15 @@ public class AbstractCodegenTest {
         @SuppressWarnings("unchecked")
         Class<Application> app = (Class<Application>) Class.forName(this.getClass().getPackage().getName() + ".Application", true, classloader);
 
-        Application application = app.newInstance();
+        Application application = app.getDeclaredConstructor().newInstance();
         app.getMethod("setup").invoke(application);
         return application;
     }
-    
+
     protected ClassLoader testClassLoader() {
         return classloader;
     }
-    
+
     protected void log(String content) {
         logger.debug(content);
     }
@@ -185,6 +177,5 @@ public class AbstractCodegenTest {
             }
             return super.findClass(name);
         }
-
     }
 }

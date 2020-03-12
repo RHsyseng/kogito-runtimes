@@ -40,7 +40,7 @@ public class ProcessContext implements org.kie.api.runtime.process.ProcessContex
             return processInstance;
         }
         if (nodeInstance != null) {
-            return (ProcessInstance) nodeInstance.getProcessInstance();
+            return nodeInstance.getProcessInstance();
         }
         return null;
     }

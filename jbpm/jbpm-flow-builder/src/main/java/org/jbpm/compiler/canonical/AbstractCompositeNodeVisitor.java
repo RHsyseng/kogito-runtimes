@@ -30,15 +30,15 @@ import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 
-public abstract class AbstractCompositeNodeVisitor extends AbstractNodeVisitor {
+public abstract class AbstractCompositeNodeVisitor extends
+                                                   AbstractNodeVisitor {
 
     protected Map<Class<?>, AbstractNodeVisitor> nodesVisitors;
 
     public AbstractCompositeNodeVisitor(Map<Class<?>, AbstractNodeVisitor> nodesVisitors) {
         this.nodesVisitors = nodesVisitors;
     }
-    
-    
+
     protected void visitNodes(String factoryField, Node[] nodes, BlockStmt body, VariableScope variableScope, ProcessMetaData metadata) {
 
         for (Node node: nodes) {

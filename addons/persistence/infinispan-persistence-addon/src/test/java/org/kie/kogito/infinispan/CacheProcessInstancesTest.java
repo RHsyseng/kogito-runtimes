@@ -48,7 +48,7 @@ public class CacheProcessInstancesTest {
         RemoteCacheManager cacheManager = new RemoteCacheManager(builder.build());
         
         
-        BpmnProcess process = (BpmnProcess) BpmnProcess.from(new ClassPathResource("BPMN2-UserTask.bpmn2")).get(0);
+        BpmnProcess process = BpmnProcess.from(new ClassPathResource("BPMN2-UserTask.bpmn2")).get(0);
         process.setProcessInstancesFactory(new CacheProcessInstancesFactory(cacheManager));
         process.configure();
                                      
@@ -65,7 +65,7 @@ public class CacheProcessInstancesTest {
         assertEquals(STATE_COMPLETED, processInstance.status());
     }
     
-    private class CacheProcessInstancesFactory extends KogitoProcessInstancesFactory {
+    private static class CacheProcessInstancesFactory extends KogitoProcessInstancesFactory {
         
         CacheProcessInstancesFactory(RemoteCacheManager cacheManager) {
             super(cacheManager);

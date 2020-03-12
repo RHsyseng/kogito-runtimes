@@ -33,11 +33,15 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.utils.StringEscapeUtils;
 import org.drools.core.util.StringUtils;
 import org.jbpm.process.core.Work;
 import org.jbpm.process.core.context.variable.Mappable;
 import org.jbpm.process.core.context.variable.Variable;
 import org.jbpm.process.core.context.variable.VariableScope;
+import org.jbpm.workflow.core.DroolsAction;
+import org.jbpm.workflow.core.impl.DroolsConsequenceAction;
+import org.jbpm.workflow.core.impl.ExtendedNodeImpl;
 import org.kie.api.definition.process.Node;
 
 import static com.github.javaparser.StaticJavaParser.parseClassOrInterfaceType;
@@ -192,5 +196,16 @@ public abstract class AbstractNodeVisitor extends AbstractVisitor {
             return variableExpression.substring(2, variableExpression.indexOf("."));
         }
         return variableExpression;
+    }
+
+    protected void addActions(BlockStmt body, ExtendedNodeImpl node) {
+        for (String actionType : node.getActionTypes()) {
+            for (DroolsAction a : node.getActions(actionType)) {
+                if (a instanceof DroolsConsequenceAction) {
+                    DroolsConsequenceAction action = (DroolsConsequenceAction) a;
+                    addFactoryMethodWithArgs(body, getNodeId(node), actionType + "Action", new StringLiteralExpr(action.getDialect()), new StringLiteralExpr(StringEscapeUtils.escapeJava(action.getConsequence())));
+                }
+            }
+        }
     }
 }

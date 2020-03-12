@@ -1,7 +1,6 @@
 package org.kie.kogito.quarkus.deployment;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,8 +22,7 @@ public class DecisionTablesCompilationProvider extends KogitoCompilationProvider
     }
 
     @Override
-    protected Generator addGenerator(ApplicationGenerator appGen, Set<File> filesToCompile, Context context)
-            throws IOException {
+    protected Generator addGenerator(ApplicationGenerator appGen, Set<File> filesToCompile, Context context) {
         Collection<File> files = PackageWalker.getAllSiblings(filesToCompile);
         return appGen.withGenerator(
                 IncrementalRuleCodegen.ofFiles(
