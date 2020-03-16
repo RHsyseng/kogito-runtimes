@@ -26,8 +26,7 @@ import com.github.javaparser.ast.expr.LongLiteralExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 
-public class HumanTaskNodeVisitor extends
-                                  AbstractNodeVisitor {
+public class HumanTaskNodeVisitor extends AbstractNodeVisitor {
 
     private static final String NODE_NAME = "humanTaskNode";
 

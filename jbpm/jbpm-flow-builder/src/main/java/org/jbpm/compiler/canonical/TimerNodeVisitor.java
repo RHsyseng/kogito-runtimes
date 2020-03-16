@@ -62,6 +62,6 @@ public class TimerNodeVisitor extends AbstractNodeVisitor {
                
         visitMetaData(timerNode.getMetaData(), body, getNodeId(node));
         
-        addFactoryMethodWithArgs(body, getNodeId(node), "done");
+        addFactoryDoneMethod(body, getNodeId(node));
     }
 }

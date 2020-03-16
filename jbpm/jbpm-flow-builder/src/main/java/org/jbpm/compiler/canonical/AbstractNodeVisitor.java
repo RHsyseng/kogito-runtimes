@@ -16,6 +16,8 @@
 
 package org.jbpm.compiler.canonical;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -40,8 +42,10 @@ import org.jbpm.process.core.context.variable.Mappable;
 import org.jbpm.process.core.context.variable.Variable;
 import org.jbpm.process.core.context.variable.VariableScope;
 import org.jbpm.workflow.core.DroolsAction;
+import org.jbpm.workflow.core.impl.ConnectionImpl;
 import org.jbpm.workflow.core.impl.DroolsConsequenceAction;
 import org.jbpm.workflow.core.impl.ExtendedNodeImpl;
+import org.kie.api.definition.process.Connection;
 import org.kie.api.definition.process.Node;
 
 import static com.github.javaparser.StaticJavaParser.parseClassOrInterfaceType;
@@ -191,6 +195,30 @@ public abstract class AbstractNodeVisitor extends AbstractVisitor {
         }
     }
 
+    protected void visitConnections(String factoryField, Node[] nodes, BlockStmt body) {
+        List<Connection> connections = new ArrayList<>();
+        for (Node node : nodes) {
+            for (List<Connection> connectionList : node.getIncomingConnections().values()) {
+                connections.addAll(connectionList);
+            }
+        }
+        for (Connection connection : connections) {
+            visitConnection(factoryField, connection, body);
+        }
+    }
+
+    protected void visitConnection(String factoryField, Connection connection, BlockStmt body) {
+        // if the connection is a hidden one (compensations), don't dump
+        Object hidden = ((ConnectionImpl) connection).getMetaData("hidden");
+        if (hidden != null && ((Boolean) hidden)) {
+            return;
+        }
+
+        addFactoryMethodWithArgs(factoryField, body, "connection", new LongLiteralExpr(connection.getFrom().getId()),
+                                 new LongLiteralExpr(connection.getTo().getId()),
+                                 new StringLiteralExpr(getOrDefault((String) connection.getMetaData().get("UniqueId"), "")));
+    }
+
     protected String extractVariableFromExpression(String variableExpression) {
         if (variableExpression.startsWith("#{")) {
             return variableExpression.substring(2, variableExpression.indexOf("."));
@@ -200,10 +228,12 @@ public abstract class AbstractNodeVisitor extends AbstractVisitor {
 
     protected void addActions(BlockStmt body, ExtendedNodeImpl node) {
         for (String actionType : node.getActionTypes()) {
-            for (DroolsAction a : node.getActions(actionType)) {
-                if (a instanceof DroolsConsequenceAction) {
-                    DroolsConsequenceAction action = (DroolsConsequenceAction) a;
-                    addFactoryMethodWithArgs(body, getNodeId(node), actionType + "Action", new StringLiteralExpr(action.getDialect()), new StringLiteralExpr(StringEscapeUtils.escapeJava(action.getConsequence())));
+            if (node.getActions(actionType) != null) {
+                for (DroolsAction a : node.getActions(actionType)) {
+                    if (a instanceof DroolsConsequenceAction) {
+                        DroolsConsequenceAction action = (DroolsConsequenceAction) a;
+                        addFactoryMethodWithArgs(body, getNodeId(node), actionType + "Action", new StringLiteralExpr(action.getDialect()), new StringLiteralExpr(StringEscapeUtils.escapeJava(action.getConsequence())));
+                    }
                 }
             }
         }
