@@ -49,15 +49,15 @@ public abstract class NodeImpl implements Node, Serializable, ContextResolver {
     private Map<String, List<Connection>> incomingConnections;
     private Map<String, List<Connection>> outgoingConnections;
     private NodeContainer parentNodeContainer;
-    private Map<String, Context> contexts = new HashMap<String, Context>();
-    private Map<String, Object> metaData = new HashMap<String, Object>();
+    private Map<String, Context> contexts = new HashMap<>();
+    private Map<String, Object> metaData = new HashMap<>();
     
-    protected Map<ConnectionRef, Constraint> constraints = new HashMap<ConnectionRef, Constraint>();
+    protected Map<ConnectionRef, Constraint> constraints = new HashMap<>();
 
     public NodeImpl() {
         this.id = -1;
-        this.incomingConnections = new HashMap<String, List<Connection>>();
-        this.outgoingConnections = new HashMap<String, List<Connection>>();
+        this.incomingConnections = new HashMap<>();
+        this.outgoingConnections = new HashMap<>();
     }
 
     public long getId() {

@@ -19,8 +19,7 @@ public class RulesCompilationProvider extends KogitoCompilationProvider {
     }
 
     @Override
-    protected Generator addGenerator(ApplicationGenerator appGen, Set<File> filesToCompile, Context context)
-            throws IOException {
+    protected Generator addGenerator(ApplicationGenerator appGen, Set<File> filesToCompile, Context context) {
         Collection<File> files = PackageWalker.getAllSiblings(filesToCompile);
         return appGen.withGenerator(
                 IncrementalRuleCodegen.ofFiles(

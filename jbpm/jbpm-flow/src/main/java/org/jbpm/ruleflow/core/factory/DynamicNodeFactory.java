@@ -86,7 +86,17 @@ public class DynamicNodeFactory extends RuleFlowNodeContainerFactory {
 		exceptionScope.setExceptionHandler(exception, exceptionHandler);
     	return this;
     }
-    
+
+    public DynamicNodeFactory name(String name) {
+    	getDynamicNode().setName(name);
+    	return this;
+	}
+
+    public DynamicNodeFactory metaData(String name, String value) {
+    	getDynamicNode().setMetaData(name, value);
+    	return this;
+	}
+
     public DynamicNodeFactory exceptionHandler(String exception, String dialect, String action) {
     	ActionExceptionHandler exceptionHandler = new ActionExceptionHandler();
     	exceptionHandler.setAction(new DroolsConsequenceAction(dialect, action));

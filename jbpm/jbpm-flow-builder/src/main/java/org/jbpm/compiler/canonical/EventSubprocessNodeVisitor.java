@@ -24,7 +24,7 @@ public class EventSubprocessNodeVisitor extends CompositeContextNodeVisitor {
     
     private static final String FACTORY_METHOD_NAME = "eventSubProcessNode";
     
-    public EventSubprocessNodeVisitor(Map<Class<?>, AbstractVisitor> nodesVisitors) {
+    public EventSubprocessNodeVisitor(Map<Class<?>, AbstractNodeVisitor> nodesVisitors) {
         super(nodesVisitors);
     }
 

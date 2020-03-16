@@ -187,20 +187,16 @@ public class MockCacheProcessInstancesTest {
     
     private void testBasicFlowWithError(Consumer<ProcessInstance<BpmnVariables>> op) {
         
-        BpmnProcess process = (BpmnProcess) BpmnProcess.from(new ClassPathResource("BPMN2-UserTask-Script.bpmn2")).get(0);
+        BpmnProcess process = BpmnProcess.from(new ClassPathResource("BPMN2-UserTask-Script.bpmn2")).get(0);
         // workaround as BpmnProcess does not compile the scripts but just reads the xml
         for (Node node : ((WorkflowProcess)process.legacyProcess()).getNodes()) {
             if (node instanceof ActionNode) {
                 DroolsAction a = ((ActionNode) node).getAction();
                 
-                a.setMetaData("Action", new Action() {
-                    
-                    @Override
-                    public void execute(ProcessContext kcontext) throws Exception {
-                        System.out.println("The variable value is " + kcontext.getVariable("s") + " about to call toString on it");
+                a.setMetaData("Action", (Action) kcontext -> {
+                    System.out.println("The variable value is " + kcontext.getVariable("s") + " about to call toString on it");
 
-                        kcontext.getVariable("s").toString();
-                    }
+                    kcontext.getVariable("s").toString();
                 });
             }
         }

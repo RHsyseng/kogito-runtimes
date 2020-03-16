@@ -37,6 +37,7 @@ import org.jbpm.process.instance.impl.CancelNodeInstanceAction;
 import org.jbpm.ruleflow.core.validation.RuleFlowProcessValidator;
 import org.jbpm.workflow.core.DroolsAction;
 import org.jbpm.workflow.core.impl.DroolsConsequenceAction;
+import org.jbpm.workflow.core.impl.ExtendedNodeImpl;
 import org.jbpm.workflow.core.node.EndNode;
 import org.jbpm.workflow.core.node.EventNode;
 import org.jbpm.workflow.core.node.EventSubProcessNode;

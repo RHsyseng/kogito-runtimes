@@ -22,16 +22,16 @@ import com.github.javaparser.ast.expr.LongLiteralExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import org.jbpm.process.core.context.variable.VariableScope;
-import org.jbpm.ruleflow.core.factory.CompositeNodeFactory;
+import org.jbpm.ruleflow.core.factory.DynamicNodeFactory;
 import org.jbpm.workflow.core.node.CompositeContextNode;
+import org.jbpm.workflow.core.node.DynamicNode;
 import org.kie.api.definition.process.Node;
 
-public class CompositeContextNodeVisitor extends AbstractCompositeNodeVisitor {
+public class DynamicNodeVisitor extends AbstractCompositeNodeVisitor {
 
-    private static final String NODE_KEY = "compositeContextNode";
-    private static final String FACTORY_METHOD_NAME = "compositeNode";
+    private static final String NODE_KEY = "dynamicNode";
 
-    public CompositeContextNodeVisitor(Map<Class<?>, AbstractNodeVisitor> nodesVisitors) {
+    public DynamicNodeVisitor(Map<Class<?>, AbstractNodeVisitor> nodesVisitors) {
         super(nodesVisitors);
     }
 
@@ -39,33 +39,25 @@ public class CompositeContextNodeVisitor extends AbstractCompositeNodeVisitor {
         return NODE_KEY;
     }
 
-    protected Class<? extends CompositeNodeFactory> factoryClass() {
-        return CompositeNodeFactory.class;
-    }
-
-    protected String factoryMethod() {
-        return FACTORY_METHOD_NAME;
-    }
-
     @Override
     public void visitNode(String factoryField, Node node, BlockStmt body, VariableScope variableScope, ProcessMetaData metadata) {
-        CompositeContextNode compositeContextNode = (CompositeContextNode) node;
+        DynamicNode dynamicNode = (DynamicNode) node;
 
-        addFactoryMethodWithArgsWithAssignment(factoryField, body, factoryClass(), getNodeId(node), factoryMethod(), new LongLiteralExpr(compositeContextNode.getId()));
-        addFactoryMethodWithArgs(body, getNodeId(node), "name", new StringLiteralExpr(getOrDefault(node.getName(), "CompositeContext")));
+        addFactoryMethodWithArgsWithAssignment(factoryField, body, DynamicNodeFactory.class, getNodeId(node), NODE_KEY, new LongLiteralExpr(dynamicNode.getId()));
+        addFactoryMethodWithArgs(body, getNodeId(node), "name", new StringLiteralExpr(getOrDefault(node.getName(), "Dynamic")));
 
-        addActions(body, compositeContextNode);
-        visitMetaData(compositeContextNode.getMetaData(), body, getNodeId(node));
-        VariableScope variableScopeNode = (VariableScope) compositeContextNode.getDefaultContext(VariableScope.VARIABLE_SCOPE);
+        addActions(body, dynamicNode);
+        visitMetaData(dynamicNode.getMetaData(), body, getNodeId(node));
+        VariableScope variableScopeNode = (VariableScope) dynamicNode.getDefaultContext(VariableScope.VARIABLE_SCOPE);
 
         if (variableScope != null) {
             visitVariableScope(getNodeId(node), variableScopeNode, body, new HashSet<>());
         }
-        visitExtendedFields(body, compositeContextNode);
+        visitExtendedFields(body, dynamicNode);
 
         // visit nodes
-        visitNodes(getNodeId(node), compositeContextNode.getNodes(), body, ((VariableScope) compositeContextNode.getDefaultContext(VariableScope.VARIABLE_SCOPE)), metadata);
-        visitConnections(getNodeId(node), compositeContextNode.getNodes(), body);
+        visitNodes(getNodeId(node), dynamicNode.getNodes(), body, ((VariableScope) dynamicNode.getDefaultContext(VariableScope.VARIABLE_SCOPE)), metadata);
+        visitConnections(getNodeId(node), dynamicNode.getNodes(), body);
         addFactoryDoneMethod(body, getNodeId(node));
     }
 

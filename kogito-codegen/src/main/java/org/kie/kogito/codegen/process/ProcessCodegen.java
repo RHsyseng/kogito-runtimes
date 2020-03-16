@@ -24,11 +24,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -70,6 +73,7 @@ public class ProcessCodegen extends AbstractGenerator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessCodegen.class);
 
+    public static final Set<String> SUPPORTED_BPMN_EXTENSIONS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(".bpmn", ".bpmn2", ".bpmn-cm")));
     private static final SemanticModules BPMN_SEMANTIC_MODULES = new SemanticModules();
 
     static {
@@ -84,7 +88,7 @@ public class ProcessCodegen extends AbstractGenerator {
         Path srcPath = Paths.get(path.toString());
         try (Stream<Path> filesStream = Files.walk(srcPath)) {
             List<File> files = filesStream
-                    .filter(p -> p.toString().endsWith(".bpmn") || p.toString().endsWith(".bpmn2"))
+                    .filter(p -> SUPPORTED_BPMN_EXTENSIONS.stream().anyMatch(p::endsWith))
                     .map(Path::toFile)
                     .collect(Collectors.toList());
             return ofFiles(files);

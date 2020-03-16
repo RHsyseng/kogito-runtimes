@@ -17,6 +17,7 @@
 package org.kie.api.runtime.process;
 
 import org.kie.api.runtime.KieContext;
+import org.kie.api.runtime.casemgmt.CaseFileInstance;
 
 /**
  * Represents the context when executing a process.
@@ -71,4 +72,8 @@ public interface ProcessContext extends KieContext {
     void setVariable(String variableName,
                      Object value);
 
+
+    CaseFileInstance getCaseData();
+
+    void setCaseData(CaseFileInstance caseData);
 }
